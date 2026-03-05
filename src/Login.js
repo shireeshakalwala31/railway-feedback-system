@@ -38,8 +38,8 @@ function Login({ onLoginSuccess, onSignupClick }) {
           />
         </div>
         
-        <h2>Railway Recruitment Board</h2>
-        <p className="login-subtitle">Passenger Feedback Form</p>
+        
+        <h1 className="login-subtitle">Passenger Feedback Form</h1>
 
         {error && (
           <div className="error-message">
