@@ -1,0 +1,25 @@
+[
+  {
+    "id": "FB-0001",
+    "location": "RAICHUR",
+    "date": "2026-03-06",
+    "fromDate": "HYDERABAD",
+    "toDate": "GADWAL",
+    "passengerName": "Tharun",
+    "pnrOrUts": "9865325628575",
+    "mobile": "8965965845",
+    "email": "Siri5@gmail.com",
+    "areas": {
+      "appearancePlatform": "Needs Improvement",
+      "taps": "Excellent",
+      "tracks": "Excellent",
+      "waitingHall": "Excellent",
+      "toilets": "Excellent",
+      "retiringRooms": "Excellent",
+      "staffBehavior": "Excellent"
+    },
+    "overallRating": 5,
+    "remarks": "Good",
+    "createdAt": "2026-03-05T16:51:46.600Z"
+  }
+]
