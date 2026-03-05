@@ -271,7 +271,7 @@ function FeedbackForm({ onBack }) {
         </p>
       </div>
 
-      <h1>PASSENGER FEEDBACK FORM - RAICHUR STATION</h1>
+      <h1>PASSENGER FEEDBACK FORM FOR RAICHUR RAILWAY STATION</h1>
 
       {error && (
         <div className="error-message">
