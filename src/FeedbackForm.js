@@ -56,7 +56,7 @@ function FeedbackForm({ onBack }) {
   // Validation functions
   const validateName = (name) => /^[A-Za-z\s]+$/.test(name);
   const validateMobile = (mobile) => /^[6-9]\d{9}$/.test(mobile);
-  const validateEmail = (email) => /^[A-Za-z0-9]+@gmail\.com$/.test(email);
+  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const validateStation = (station) => /^[A-Za-z\s]+$/.test(station);
   const validateTicket = (ticket) => /^[A-Za-z0-9]+$/.test(ticket);
 
@@ -117,7 +117,7 @@ function FeedbackForm({ onBack }) {
       return;
     }
     if (!validateEmail(email)) {
-      setError('Please enter a valid Gmail address');
+      setError('Please enter a valid email address');
       return;
     }
 

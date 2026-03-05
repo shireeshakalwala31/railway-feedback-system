@@ -146,7 +146,7 @@ function AdminDashboard() {
         <div className="header-content">
           <div className="logo-section">
             <img 
-              src="/logo192.png" 
+              src="/rrb-official-logo.png" 
               alt="Indian Railways Logo" 
               className="railway-logo"
               onError={(e) => { 
