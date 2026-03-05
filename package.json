@@ -26,6 +26,10 @@
       "react-app/jest"
     ]
   },
+  
+"scripts": {
+  "build": "CI=false react-scripts build"
+},
   "browserslist": {
     "production": [
       ">0.2%",
