@@ -1,7 +1,15 @@
-# Task: Add Train Animation at Login
+# TODO - Fix Login Issue
 
-## Plan:
-- [ ] Update src/Login.js - Add title "PASSENGER FEEDBACK FORM FOR RAICHUR RAILWAY STATION" and train icon
-- [ ] Update src/Login.css - Add CSS animations for train moving left to right (anime-style)
+## Task: User unable to login - Fix authentication
 
-## Status: In Progress
+### Problem Identified:
+- users.json has corrupted/invalid bcrypt password hashes
+- Need to add a working user with valid credentials
+
+### Solution:
+- [x] Analyzed the codebase and identified the issue
+- [ ] Add working user credentials to users.json
+
+### Working Credentials to use:
+- Username: testuser
+- Password: Test@1234

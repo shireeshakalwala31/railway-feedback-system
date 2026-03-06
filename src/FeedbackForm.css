@@ -51,6 +51,25 @@ body {
   font-size: 15px;
 }
 
+/* Title Container with Train and Snowflake */
+.title-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.title-container .fa-train {
+  font-size: 28px;
+  color: #1e3c72;
+}
+
+.title-container .fa-snowflake {
+  font-size: 24px;
+  color: #06b6d4;
+}
+
 /* Main Heading */
 .feedback-form-container h1 {
   text-align: center;

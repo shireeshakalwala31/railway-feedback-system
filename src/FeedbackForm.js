@@ -272,7 +272,8 @@ function FeedbackForm({ onBack }) {
       </div>
 
       <div className="title-container">
-        <i className="fa-solid fa-train moving-train"></i>
+        <i className="fa-solid fa-train"></i>
+        <i className="fa-solid fa-snowflake"></i>
         <h1>PASSENGER FEEDBACK FORM FOR RAICHUR RAILWAY STATION</h1>
       </div>
 
