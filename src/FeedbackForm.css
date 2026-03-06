@@ -57,11 +57,11 @@ body {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .title-container .fa-train {
-  font-size: 28px;
+  font-size: 40px;
   color: #1e3c72;
 }
 
