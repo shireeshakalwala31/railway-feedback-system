@@ -271,7 +271,10 @@ function FeedbackForm({ onBack }) {
         </p>
       </div>
 
-      <h1>PASSENGER FEEDBACK FORM FOR RAICHUR RAILWAY STATION</h1>
+      <div className="title-container">
+        <i className="fa-solid fa-train moving-train"></i>
+        <h1>PASSENGER FEEDBACK FORM FOR RAICHUR RAILWAY STATION</h1>
+      </div>
 
       {error && (
         <div className="error-message">

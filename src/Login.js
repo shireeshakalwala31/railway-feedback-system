@@ -38,6 +38,9 @@ function Login({ onLoginSuccess, onSignupClick }) {
           />
         </div>
         
+        <div className="train-animation">
+          <i className="fa-solid fa-train moving-train"></i>
+        </div>
         
         <h1 className="login-subtitle">Passenger Feedback Form</h1>
 
