@@ -7,8 +7,8 @@ import Signup from './Signup';
 import AdminDashboard from './AdminDashboard';
 
 // Protected Route Component
-function ProtectedRoute({ children }) {
-  const { isAuthenticated, loading } = useAuth();
+function ProtectedRoute({ children, requiredStation }) {
+  const { isAuthenticated, loading, user } = useAuth();
   const navigate = useNavigate();
   
   if (loading) {
@@ -38,7 +38,34 @@ function ProtectedRoute({ children }) {
   }
   
   if (!isAuthenticated) {
+    // User is not logged in - redirect to the station's login page
+    if (requiredStation) {
+      // Store the intended destination for redirect after login
+      localStorage.setItem('redirectAfterLogin', `/feedback/${requiredStation.toLowerCase()}`);
+      localStorage.setItem('selectedStation', requiredStation.toUpperCase());
+      return <Navigate to={`/${requiredStation.toLowerCase()}`} replace />;
+    }
     return <Navigate to="/login" replace />;
+  }
+  
+  // User is authenticated - check if they can access this station's feedback form
+  if (requiredStation && user) {
+    const userStation = user.station?.toUpperCase();
+    const requiredStationUpper = requiredStation.toUpperCase();
+    
+    // Check if user's station matches the required station
+    if (userStation !== requiredStationUpper) {
+      // User is logged in but trying to access wrong station's feedback
+      // Redirect to their own station's feedback form
+      if (userStation === 'RAICHUR') {
+        return <Navigate to="/feedback/raichur" replace />;
+      } else if (userStation === 'YADGIR') {
+        return <Navigate to="/feedback/yadgir" replace />;
+      } else {
+        // No valid station - redirect to login
+        return <Navigate to="/login" replace />;
+      }
+    }
   }
   
   return children;
@@ -68,10 +95,20 @@ function LoginHandler({ station: stationProp }) {
   }, [stationProp]);
   
   const handleLoginSuccess = () => {
-    // Get station from localStorage (set when visiting /raichur or /yadgir)
+    // First priority: Check if there's a stored redirect URL from ProtectedRoute
+    const redirectAfterLogin = localStorage.getItem('redirectAfterLogin');
+    
+    if (redirectAfterLogin) {
+      // Clear the redirect URL and navigate to the protected page
+      localStorage.removeItem('redirectAfterLogin');
+      navigate(redirectAfterLogin);
+      return;
+    }
+    
+    // Second priority: Get station from localStorage (set when visiting /raichur or /yadgir)
     const selectedStation = localStorage.getItem('selectedStation');
     
-    // Also check user data for backward compatibility
+    // Third priority: Check user data for backward compatibility
     const userData = localStorage.getItem('user');
     let userStation = null;
     
@@ -92,8 +129,8 @@ function LoginHandler({ station: stationProp }) {
       navigate('/feedback');
     }
     
-    // Clear selectedStation after use (optional - keeps it for reference)
-    // localStorage.removeItem('selectedStation');
+    // Clear selectedStation after use
+    localStorage.removeItem('selectedStation');
   };
   
   const handleSignupClick = () => {

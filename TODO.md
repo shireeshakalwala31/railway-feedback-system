@@ -1,18 +1,20 @@
-# Task: Station-based Login Flow
+# Authentication Fix - TODO
 
-## Plan
+## Task
+Fix authentication so that feedback forms at /feedback/raichur and /feedback/yadgir are protected and require login. Without login, users should be redirected to their station's login page.
 
-### 1. src/App.js
-- [ ] Modify LoginHandler to accept and use the station prop
-- [ ] Save station to localStorage before login
-- [ ] After successful login, redirect to /feedback/{station} using localStorage
+## Changes Required
 
-### 2. src/Login.js
-- [ ] Accept optional station prop
-- [ ] Display station name on login form when provided
+- [ ] 1. Update src/App.js - Fix ProtectedRoute to properly redirect to station-specific login
+- [ ] 2. Update src/AuthContext.js - Add station-based access control helper
+- [ ] 3. Test the implementation
 
-### 3. src/FeedbackForm.js
-- [ ] Check localStorage for station if not provided via prop or URL param
+## Implementation Details
 
-## Completed
-- [x] Analysis and planning
+### 1. App.js Changes:
+- Improve ProtectedRoute to properly handle station-specific authentication
+- Ensure users can only access feedback forms for their assigned station
+- Redirect to correct station login page based on URL
+
+### 2. AuthContext.js Changes:
+- Add checkStationAccess function to verify user's station matches the requested station
