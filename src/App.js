@@ -73,6 +73,10 @@ function App() {
   return (
     <AuthProvider>
       <Routes>
+        {/* Public route for passengers - direct links for each station (no login needed) */}
+        <Route path="/raichur" element={<FeedbackForm station="RAICHUR" />} />
+        <Route path="/yadgir" element={<FeedbackForm station="YADGIR" />} />
+        
         {/* Public route for passengers to submit feedback - supports multiple stations via URL parameter */}
         <Route path="/feedback/:station" element={<FeedbackForm />} />
         

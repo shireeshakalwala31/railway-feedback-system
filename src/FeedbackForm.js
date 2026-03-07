@@ -32,10 +32,11 @@ const starRatings = [
   { value: 1, label: '1 Star' }
 ];
 
-function FeedbackForm({ onBack }) {
-  // Get station from URL params
-  const { station } = useParams();
-  const stationName = station ? station.toUpperCase() : "RAICHUR";
+function FeedbackForm({ station: stationProp, onBack }) {
+  // Get station from URL params or use prop
+  const { station: urlStation } = useParams();
+  // Use prop if provided, otherwise fall back to URL param
+  const stationName = stationProp ? stationProp.toUpperCase() : (urlStation ? urlStation.toUpperCase() : "RAICHUR");
 
   // Passenger details state
   const [passengerName, setPassengerName] = useState('');
