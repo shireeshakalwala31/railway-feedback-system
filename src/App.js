@@ -5,7 +5,6 @@ import FeedbackForm from './FeedbackForm';
 import Login from './Login';
 import Signup from './Signup';
 import AdminDashboard from './AdminDashboard';
-import SEOHelmet from './SEOHelmet';
 
 // Protected Route Component
 function ProtectedRoute({ children }) {
