@@ -215,16 +215,13 @@ function FeedbackForm({ onBack }) {
 
   return (
     <div className="feedback-form-container">
-      {/* Notice Box - Step 1: Image only, Step 2: Blue background with text */}
-      {currentStep === 1 ? (
-        <div className="notice-box-image-only">
-          <img 
-            src={require('./assests/Raichurimage.jpg')} 
-            alt="Railway Station" 
-            className="notice-station-image"
-          />
-        </div>
-      ) : (
+      {/* Notice Box - Step 1: Image + Notice, Step 2: Image + Notice */}
+      <div className="notice-box-with-image">
+        <img 
+          src={require('./assests/Raichurimage.jpg')} 
+          alt="Railway Station" 
+          className="notice-station-image"
+        />
         <div className="notice-box-feedback">
           <h2><i className="fa-solid fa-bullhorn"></i> Passenger Notice</h2>
           <p><strong>Dear Passenger,</strong></p>
@@ -239,7 +236,7 @@ function FeedbackForm({ onBack }) {
             it will help us to serve you better.
           </p>
         </div>
-      )}
+      </div>
 
       <div className="title-container">
         <i className="fa-solid fa-train"></i>

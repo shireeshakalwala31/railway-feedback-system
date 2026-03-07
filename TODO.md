@@ -1,16 +1,16 @@
-# TODO - Remove email, from, to from passenger details
+# FeedbackForm UI Changes - TODO
 
-## Task: Remove email, From Station, and To Station fields from passenger details
+## Plan:
+- Modify Step 1 to show full image + Passenger Notice (text) → Title → Passenger Details Form
+- Modify Step 2 to show full image + Passenger Notice (text) → Title → Feedback Form
+- Increase/remove max-height on station image to show full image
+- Add styles for new combined container
 
-- [x] Update src/FeedbackForm.js - Remove email, fromStation, toStation state, validation, form fields, and submit payload
-- [x] Update server/index.js - Remove email, fromStation, toStation from backend validation and stored data
-
-## Changes Summary:
-1. [x] Remove email field from passenger details form
-2. [x] Remove From Station field from passenger details form
-3. [x] Remove To Station field from passenger details form
-4. [x] Remove related validations
-5. [x] Update API payload to exclude these fields
-6. [x] Update backend to not require/store these fields
-
-## Completed!
+## Tasks:
+- [ ] CSS Changes (FeedbackForm.css)
+  - [ ] Increase/remove max-height: 350px on .notice-station-image
+  - [ ] Add new container styles for image + notice combined
+- [ ] JS Changes (FeedbackForm.js)
+  - [ ] Modify Step 1 to show image + passenger notice
+  - [ ] Modify Step 2 to show image + passenger notice
+- [ ] Test the changes
