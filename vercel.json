@@ -1,0 +1,17 @@
+{
+  "github": {
+    "silent": true
+  },
+  "routes": [
+    {
+      "src": "/raichur",
+      "dest": "/api/og.js",
+      "beforeFiles": true
+    },
+    {
+      "src": "/yadgir",
+      "dest": "/api/og.js",
+      "beforeFiles": true
+    }
+  ]
+}
