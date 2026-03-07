@@ -45,28 +45,44 @@ function ProtectedRoute({ children }) {
 }
 
 // Login handler component
-function LoginHandler() {
+function LoginHandler({ station: stationProp }) {
   const navigate = useNavigate();
   const [showSignup, setShowSignup] = useState(false);
   
+  // Save station to localStorage when component mounts (for /raichur or /yadgir routes)
+  React.useEffect(() => {
+    if (stationProp) {
+      localStorage.setItem('selectedStation', stationProp.toUpperCase());
+    }
+  }, [stationProp]);
+  
   const handleLoginSuccess = () => {
-    // Get user data from localStorage to determine station
+    // Get station from localStorage (set when visiting /raichur or /yadgir)
+    const selectedStation = localStorage.getItem('selectedStation');
+    
+    // Also check user data for backward compatibility
     const userData = localStorage.getItem('user');
+    let userStation = null;
+    
     if (userData) {
       const user = JSON.parse(userData);
-      const station = user.station?.toLowerCase();
-      
-      // Redirect based on station
-      if (station === 'raichur') {
-        navigate('/raichur');
-      } else if (station === 'yadgir') {
-        navigate('/yadgir');
-      } else {
-        navigate('/feedback');
-      }
+      userStation = user.station?.toLowerCase();
+    }
+    
+    // Priority: selectedStation from URL > user.station from database
+    const redirectStation = selectedStation || userStation;
+    
+    // Redirect based on station
+    if (redirectStation === 'raichur' || redirectStation === 'RAICHUR') {
+      navigate('/feedback/raichur');
+    } else if (redirectStation === 'yadgir' || redirectStation === 'YADGIR') {
+      navigate('/feedback/yadgir');
     } else {
       navigate('/feedback');
     }
+    
+    // Clear selectedStation after use (optional - keeps it for reference)
+    // localStorage.removeItem('selectedStation');
   };
   
   const handleSignupClick = () => {
@@ -89,9 +105,9 @@ function App() {
   return (
     <AuthProvider>
       <Routes>
-        {/* Public route for passengers - direct links for each station (no login needed) */}
-        <Route path="/raichur" element={<FeedbackForm station="RAICHUR" />} />
-        <Route path="/yadgir" element={<FeedbackForm station="YADGIR" />} />
+        {/* Public route for passengers - separate links for each station with login */}
+        <Route path="/raichur" element={<LoginHandler station="RAICHUR" />} />
+        <Route path="/yadgir" element={<LoginHandler station="YADGIR" />} />
         
         {/* Public route for passengers to submit feedback - supports multiple stations via URL parameter */}
         <Route path="/feedback/:station" element={<FeedbackForm />} />
