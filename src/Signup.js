@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useAuth } from './AuthContext';
 import './Login.css';
 
 const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5000/api';
@@ -150,12 +149,11 @@ function Signup({ onSignupSuccess, onLoginClick }) {
 
         <div className="signup-link">
           Already have an account?
-          <a href="#" onClick={(e) => {
-            e.preventDefault();
+          <button type="button" className="link-button" onClick={() => {
             if (onLoginClick) onLoginClick();
           }}>
             Login
-          </a>
+          </button>
         </div>
       </div>
     </div>

@@ -90,12 +90,11 @@ function Login({ onLoginSuccess, onSignupClick }) {
 
         <div className="signup-link">
           Don't have an account?
-          <a href="#" onClick={(e) => {
-            e.preventDefault();
+          <button type="button" className="link-button" onClick={() => {
             if (onSignupClick) onSignupClick();
           }}>
             Sign Up
-          </a>
+          </button>
         </div>
       </div>
     </div>

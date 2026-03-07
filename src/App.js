@@ -11,7 +11,6 @@ function ProtectedRoute({ children }) {
   const { isAuthenticated, loading, user } = useAuth();
   const { station: urlStation } = useParams();
   const requiredStation = urlStation;
-  const navigate = useNavigate();
   
   if (loading) {
     return (
@@ -71,17 +70,6 @@ function ProtectedRoute({ children }) {
   }
   
   return children;
-}
-
-// StationSaver component - saves station from URL to localStorage for login redirect
-function StationSaver({ station }) {
-  React.useEffect(() => {
-    if (station) {
-      localStorage.setItem('selectedStation', station.toUpperCase());
-    }
-  }, [station]);
-  
-  return null;
 }
 
 // Login handler component

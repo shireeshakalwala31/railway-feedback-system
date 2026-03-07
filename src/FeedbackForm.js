@@ -23,15 +23,6 @@ const ratingOptions = [
   { value: 'Not Applicable', label: 'Not Attended' }
 ];
 
-// Star rating options
-const starRatings = [
-  { value: 5, label: '5 Stars' },
-  { value: 4, label: '4 Stars' },
-  { value: 3, label: '3 Stars' },
-  { value: 2, label: '2 Stars' },
-  { value: 1, label: '1 Star' }
-];
-
 function FeedbackForm({ station: stationProp, onBack }) {
   // Get station from URL params or use prop
   const { station: urlStation } = useParams();
@@ -45,7 +36,6 @@ function FeedbackForm({ station: stationProp, onBack }) {
   const [mobile, setMobile] = useState('');
 
   // Feedback state
-  const [stations, setStations] = useState([stationName]);
   const [currentStep, setCurrentStep] = useState(1);
   const [feedbackEntries, setFeedbackEntries] = useState([]);
   const [currentStation, setCurrentStation] = useState(stationName);
@@ -93,9 +83,7 @@ function FeedbackForm({ station: stationProp, onBack }) {
       setError('Enter valid 10-digit Indian mobile number');
       return;
     }
-
-    // Set stations for feedback based on URL parameter
-    setStations([stationName]);
+    
     setCurrentStation(stationName);
     setCurrentStep(2);
   };
@@ -185,7 +173,6 @@ function FeedbackForm({ station: stationProp, onBack }) {
     setDateOfJourney('');
     setTicketNumber('');
     setMobile('');
-    setStations([stationName]);
     setFeedbackEntries([]);
     setCurrentStation(stationName);
     setCurrentRatings({});

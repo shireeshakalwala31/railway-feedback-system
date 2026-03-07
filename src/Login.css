@@ -131,13 +131,21 @@ body {
   color: #666;
 }
 
-.signup-link a {
+.signup-link a,
+.signup-link .link-button {
   color: #1e3c72;
   text-decoration: none;
   font-weight: 600;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: inherit;
+  padding: 0;
 }
 
-.signup-link a:hover {
+.signup-link a:hover,
+.signup-link .link-button:hover {
   text-decoration: underline;
 }
 
