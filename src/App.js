@@ -8,8 +8,10 @@ import AdminDashboard from './AdminDashboard';
 import SEOHelmet from './SEOHelmet';
 
 // Protected Route Component
-function ProtectedRoute({ children, requiredStation }) {
+function ProtectedRoute({ children }) {
   const { isAuthenticated, loading, user } = useAuth();
+  const { station: urlStation } = useParams();
+  const requiredStation = urlStation;
   const navigate = useNavigate();
   
   if (loading) {
@@ -127,7 +129,8 @@ function LoginHandler({ station: stationProp }) {
     } else if (redirectStation === 'yadgir' || redirectStation === 'YADGIR') {
       navigate('/feedback/yadgir');
     } else {
-      navigate('/feedback');
+      // Default to raichur if no station found
+      navigate('/feedback/raichur');
     }
     
     // Clear selectedStation after use
@@ -160,7 +163,7 @@ function App() {
         
         {/* Protected route for passengers to submit feedback - requires authentication */}
         <Route path="/feedback/:station" element={
-          <ProtectedRoute requiredStation=":station">
+          <ProtectedRoute>
             <FeedbackForm />
           </ProtectedRoute>
         } />

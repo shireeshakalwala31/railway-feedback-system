@@ -2,16 +2,14 @@
   "github": {
     "silent": true
   },
-  "routes": [
+  "rewrites": [
     {
-      "src": "/raichur",
-      "dest": "/api/og.js",
-      "beforeFiles": true
+      "source": "/raichur",
+      "destination": "/api/og.js"
     },
     {
-      "src": "/yadgir",
-      "dest": "/api/og.js",
-      "beforeFiles": true
+      "source": "/yadgir",
+      "destination": "/api/og.js"
     }
   ]
 }
