@@ -1,35 +1,14 @@
-# TODO: Multi-Station Support Implementation
+# TODO - Station-based Login Redirect
 
-## Plan Summary
-Add support for multiple railway stations (Raichur and Yadgir) using URL parameters, so both links share the same form but display different station names.
+## Plan
+- [x] Understand the codebase and create plan
+- [ ] Add Yadgir user to server/data/users.json
+- [ ] Update server/index.js to include station in login response
+- [ ] Update src/AuthContext.js to store station from login
+- [ ] Update src/App.js to redirect to correct station page after login
 
-## Files to Edit
-
-### 1. src/FeedbackForm.js
-- [x] Import `useParams` from "react-router-dom"
-- [x] Add station parameter using `useParams()` hook
-- [x] Create `stationName` variable with fallback to "RAICHUR"
-- [x] Replace hardcoded `setStations(['RAICHUR'])` with `setStations([stationName])`
-- [x] Replace hardcoded `setCurrentStation('RAICHUR')` with `setCurrentStation(stationName)`
-- [x] Update heading "PASSENGER FEEDBACK FORM FOR RAICHUR RAILWAY STATION" to use `{stationName}`
-- [x] Update section title "Feedback for: RAICHUR STATION" to use `{stationName}`
-- [x] Update reset function to use `stationName` instead of 'RAICHUR'
-
-### 2. src/App.js
-- [x] Update route path from `/feedback` to `/feedback/:station`
-
-## Followup Steps
-- Test the changes locally
-- Commit and push to git for Railway deployment
-
-## Git Commands to Push Changes
-```
-bash
-git add .
-git commit -m "Added multi station support"
-git push
-```
-
-## Final Links
-- Raichur: https://railway-feedback-system-production.up.railway.app/feedback/raichur
-- Yadgir: https://railway-feedback-system-production.up.railway.app/feedback/yadgir
+## Implementation Steps:
+1. Add Yadgir user credentials (yadgir@45 / Yadgir56@) to users.json
+2. Update login endpoint in server to return station info for each user
+3. Modify AuthContext to store station info in localStorage
+4. Modify App.js LoginHandler to redirect based on user's station

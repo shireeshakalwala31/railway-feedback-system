@@ -13,8 +13,9 @@ const USERS_FILE = path.join(__dirname, 'data', 'users.json');
 
 // Hardcoded admin credentials
 const ADMIN_CREDENTIALS = {
-  username: 'raichu@1234',
-  password: 'Raichu9876@'
+  username: 'raichur@1234',
+  password: 'Raichu9876@',
+  station: 'RAICHUR'
 };
 
 app.use(cors());
@@ -143,13 +144,14 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(400).json({ error: 'Username and password are required' });
     }
     
-    // Check hardcoded admin credentials first
+// Check hardcoded admin credentials first
     if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
       const token = generateToken({
         id: '1',
         username: ADMIN_CREDENTIALS.username,
         role: 'admin',
-        name: 'Raichur Admin'
+        name: 'Raichur Admin',
+        station: ADMIN_CREDENTIALS.station
       });
       
       return res.json({
@@ -160,7 +162,8 @@ app.post('/api/auth/login', async (req, res) => {
           id: '1',
           username: ADMIN_CREDENTIALS.username,
           role: 'admin',
-          name: 'Raichur Admin'
+          name: 'Raichur Admin',
+          station: ADMIN_CREDENTIALS.station
         }
       });
     }
@@ -184,7 +187,13 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid username or password' });
     }
     
-    const token = generateToken(user);
+const token = generateToken({
+      id: user.id,
+      username: user.username,
+      role: user.role,
+      name: user.name,
+      station: user.station || 'RAICHUR'
+    });
     res.json({
       success: true,
       message: 'Login successful',
@@ -193,7 +202,8 @@ app.post('/api/auth/login', async (req, res) => {
         id: user.id,
         username: user.username,
         role: user.role,
-        name: user.name
+        name: user.name,
+        station: user.station || 'RAICHUR'
       }
     });
   } catch (error) {

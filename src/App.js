@@ -50,7 +50,23 @@ function LoginHandler() {
   const [showSignup, setShowSignup] = useState(false);
   
   const handleLoginSuccess = () => {
-    navigate('/feedback');
+    // Get user data from localStorage to determine station
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const user = JSON.parse(userData);
+      const station = user.station?.toLowerCase();
+      
+      // Redirect based on station
+      if (station === 'raichur') {
+        navigate('/raichur');
+      } else if (station === 'yadgir') {
+        navigate('/yadgir');
+      } else {
+        navigate('/feedback');
+      }
+    } else {
+      navigate('/feedback');
+    }
   };
   
   const handleSignupClick = () => {
