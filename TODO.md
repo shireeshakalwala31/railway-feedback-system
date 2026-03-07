@@ -1,16 +1,35 @@
-# FeedbackForm UI Changes - TODO
+# TODO: Multi-Station Support Implementation
 
-## Plan:
-- Modify Step 1 to show full image + Passenger Notice (text) → Title → Passenger Details Form
-- Modify Step 2 to show full image + Passenger Notice (text) → Title → Feedback Form
-- Increase/remove max-height on station image to show full image
-- Add styles for new combined container
+## Plan Summary
+Add support for multiple railway stations (Raichur and Yadgir) using URL parameters, so both links share the same form but display different station names.
 
-## Tasks:
-- [ ] CSS Changes (FeedbackForm.css)
-  - [ ] Increase/remove max-height: 350px on .notice-station-image
-  - [ ] Add new container styles for image + notice combined
-- [ ] JS Changes (FeedbackForm.js)
-  - [ ] Modify Step 1 to show image + passenger notice
-  - [ ] Modify Step 2 to show image + passenger notice
-- [ ] Test the changes
+## Files to Edit
+
+### 1. src/FeedbackForm.js
+- [x] Import `useParams` from "react-router-dom"
+- [x] Add station parameter using `useParams()` hook
+- [x] Create `stationName` variable with fallback to "RAICHUR"
+- [x] Replace hardcoded `setStations(['RAICHUR'])` with `setStations([stationName])`
+- [x] Replace hardcoded `setCurrentStation('RAICHUR')` with `setCurrentStation(stationName)`
+- [x] Update heading "PASSENGER FEEDBACK FORM FOR RAICHUR RAILWAY STATION" to use `{stationName}`
+- [x] Update section title "Feedback for: RAICHUR STATION" to use `{stationName}`
+- [x] Update reset function to use `stationName` instead of 'RAICHUR'
+
+### 2. src/App.js
+- [x] Update route path from `/feedback` to `/feedback/:station`
+
+## Followup Steps
+- Test the changes locally
+- Commit and push to git for Railway deployment
+
+## Git Commands to Push Changes
+```
+bash
+git add .
+git commit -m "Added multi station support"
+git push
+```
+
+## Final Links
+- Raichur: https://railway-feedback-system-production.up.railway.app/feedback/raichur
+- Yadgir: https://railway-feedback-system-production.up.railway.app/feedback/yadgir

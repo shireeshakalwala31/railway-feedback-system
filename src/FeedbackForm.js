@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import './FeedbackForm.css';
 
 const API_BASE = "https://railway-feedback-system-production.up.railway.app/api";
@@ -32,6 +33,10 @@ const starRatings = [
 ];
 
 function FeedbackForm({ onBack }) {
+  // Get station from URL params
+  const { station } = useParams();
+  const stationName = station ? station.toUpperCase() : "RAICHUR";
+
   // Passenger details state
   const [passengerName, setPassengerName] = useState('');
   const [dateOfJourney, setDateOfJourney] = useState('');
@@ -39,10 +44,10 @@ function FeedbackForm({ onBack }) {
   const [mobile, setMobile] = useState('');
 
   // Feedback state
-  const [stations, setStations] = useState(['RAICHUR']);
+  const [stations, setStations] = useState([stationName]);
   const [currentStep, setCurrentStep] = useState(1);
   const [feedbackEntries, setFeedbackEntries] = useState([]);
-  const [currentStation, setCurrentStation] = useState('RAICHUR');
+  const [currentStation, setCurrentStation] = useState(stationName);
   const [currentRatings, setCurrentRatings] = useState({});
   const [overallRating, setOverallRating] = useState(0);
   const [remarks, setRemarks] = useState('');
@@ -88,9 +93,9 @@ function FeedbackForm({ onBack }) {
       return;
     }
 
-    // Set stations for feedback - fixed to Raichur
-    setStations(['RAICHUR']);
-    setCurrentStation('RAICHUR');
+    // Set stations for feedback based on URL parameter
+    setStations([stationName]);
+    setCurrentStation(stationName);
     setCurrentStep(2);
   };
 
@@ -179,9 +184,9 @@ function FeedbackForm({ onBack }) {
     setDateOfJourney('');
     setTicketNumber('');
     setMobile('');
-    setStations(['RAICHUR']);
+    setStations([stationName]);
     setFeedbackEntries([]);
-    setCurrentStation('RAICHUR');
+    setCurrentStation(stationName);
     setCurrentRatings({});
     setOverallRating(0);
     setRemarks('');
@@ -218,8 +223,8 @@ function FeedbackForm({ onBack }) {
       {/* Notice Box - Step 1: Image + Notice, Step 2: Image + Notice */}
       <div className="notice-box-with-image">
         <img 
-          src={require('./assests/Raichurimage.jpg')} 
-          alt="Railway Station" 
+          src={stationName === 'YADGIR' ? require('./assests/Yadgirimage.jpg') : require('./assests/Raichurimage.jpg')} 
+          alt={`${stationName} Railway Station`} 
           className="notice-station-image"
         />
         <div className="notice-box-feedback">
@@ -240,7 +245,7 @@ function FeedbackForm({ onBack }) {
 
       <div className="title-container">
         <i className="fa-solid fa-train"></i>
-        <h1>PASSENGER FEEDBACK FORM FOR RAICHUR RAILWAY STATION</h1>
+        <h1>PASSENGER FEEDBACK FORM FOR {stationName} RAILWAY STATION</h1>
       </div>
 
       {error && (
@@ -306,7 +311,7 @@ function FeedbackForm({ onBack }) {
       {currentStep === 2 && (
         <div className="feedback-section">
           <div className="section-title">
-            <i className="fa-solid fa-building"></i> Feedback for: RAICHUR STATION
+            <i className="fa-solid fa-building"></i> Feedback for: {stationName} STATION
           </div>
 
           <div className="rating-cards">

@@ -73,8 +73,8 @@ function App() {
   return (
     <AuthProvider>
       <Routes>
-        {/* Public route for passengers to submit feedback */}
-        <Route path="/feedback" element={<FeedbackForm />} />
+        {/* Public route for passengers to submit feedback - supports multiple stations via URL parameter */}
+        <Route path="/feedback/:station" element={<FeedbackForm />} />
         
         {/* Public route for login */}
         <Route path="/login" element={<LoginHandler />} />
