@@ -13,7 +13,7 @@ body {
 
 /* Base container */
 .feedback-form-container {
-  max-width: 1000px;
+  max-width: 1500px;
   margin: auto;
   background: white;
   padding: 30px;
@@ -21,9 +21,25 @@ body {
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
 }
 
+/* Notice Box - Image Only (Step 1) */
+.notice-box-image-only {
+  margin-bottom: 25px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.notice-station-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  max-height: 200px;
+  object-fit: cover;
+}
+
 /* Notice Box - Attractive Style */
 .notice-box {
-  background-image: url('/Raichurimage.jpg');
+  background-image: url('./assests/Raichurimage.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -49,6 +65,36 @@ body {
 }
 
 .notice-box > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Notice Box for Feedback Step (Blue Background) */
+.notice-box-feedback {
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  color: white;
+  padding: 25px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  position: relative;
+  border: 3px solid #3b82f6;
+}
+
+/* Remove overlay for blue background version */
+.notice-box-feedback::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(30, 60, 114, 0.7);
+  border-radius: 12px;
+  z-index: 1;
+}
+
+.notice-box-feedback > * {
   position: relative;
   z-index: 2;
 }

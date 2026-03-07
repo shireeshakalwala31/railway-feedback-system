@@ -215,21 +215,31 @@ function FeedbackForm({ onBack }) {
 
   return (
     <div className="feedback-form-container">
-      {/* Notice Box */}
-      <div className="notice-box">
-        <h2><i className="fa-solid fa-bullhorn"></i> Passenger Notice</h2>
-        <p><strong>Dear Passenger,</strong></p>
-        <p>
-          Our endeavor is to provide you the most hygienic services under 
-          <strong> Railway Station Housekeeping</strong> round the clock at Raichur station.
-        </p>
-        <p>
-          <strong>Feedback:</strong> Passengers are requested to give feedback regarding services 
-          provided by housekeeping staff, in the forms available with station staff. 
-          Based on your feedback, payment to the contractor will be made and 
-          it will help us to serve you better.
-        </p>
-      </div>
+      {/* Notice Box - Step 1: Image only, Step 2: Blue background with text */}
+      {currentStep === 1 ? (
+        <div className="notice-box-image-only">
+          <img 
+            src={require('./assests/Raichurimage.jpg')} 
+            alt="Railway Station" 
+            className="notice-station-image"
+          />
+        </div>
+      ) : (
+        <div className="notice-box-feedback">
+          <h2><i className="fa-solid fa-bullhorn"></i> Passenger Notice</h2>
+          <p><strong>Dear Passenger,</strong></p>
+          <p>
+            Our endeavor is to provide you the most hygienic services under 
+            <strong> Railway Station Housekeeping</strong> round the clock at Raichur station.
+          </p>
+          <p>
+            <strong>Feedback:</strong> Passengers are requested to give feedback regarding services 
+            provided by housekeeping staff, in the forms available with station staff. 
+            Based on your feedback, payment to the contractor will be made and 
+            it will help us to serve you better.
+          </p>
+        </div>
+      )}
 
       <div className="title-container">
         <i className="fa-solid fa-train"></i>
