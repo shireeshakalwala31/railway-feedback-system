@@ -35,11 +35,8 @@ function FeedbackForm({ onBack }) {
   // Passenger details state
   const [passengerName, setPassengerName] = useState('');
   const [dateOfJourney, setDateOfJourney] = useState('');
-  const [fromStation, setFromStation] = useState('');
-  const [toStation, setToStation] = useState('');
   const [ticketNumber, setTicketNumber] = useState('');
   const [mobile, setMobile] = useState('');
-  const [email, setEmail] = useState('');
 
   // Feedback state
   const [stations, setStations] = useState(['RAICHUR']);
@@ -56,8 +53,6 @@ function FeedbackForm({ onBack }) {
   // Validation functions
   const validateName = (name) => /^[A-Za-z\s]+$/.test(name);
   const validateMobile = (mobile) => /^[6-9]\d{9}$/.test(mobile);
-  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  const validateStation = (station) => /^[A-Za-z\s]+$/.test(station);
   const validateTicket = (ticket) => /^[A-Za-z0-9]+$/.test(ticket);
 
   // Handle passenger details submission
@@ -76,26 +71,6 @@ function FeedbackForm({ onBack }) {
       setError('Please select Date of Journey');
       return;
     }
-    if (!fromStation) {
-      setError('From Station is required');
-      return;
-    }
-    if (!validateStation(fromStation)) {
-      setError('From Station should contain only alphabets');
-      return;
-    }
-    if (!toStation) {
-      setError('To Station is required');
-      return;
-    }
-    if (!validateStation(toStation)) {
-      setError('To Station should contain only alphabets');
-      return;
-    }
-    if (fromStation.toLowerCase() === toStation.toLowerCase()) {
-      setError('From and To stations cannot be same');
-      return;
-    }
     if (!ticketNumber) {
       setError('Ticket Number is required');
       return;
@@ -110,14 +85,6 @@ function FeedbackForm({ onBack }) {
     }
     if (!validateMobile(mobile)) {
       setError('Enter valid 10-digit Indian mobile number');
-      return;
-    }
-    if (!email) {
-      setError('Email is required');
-      return;
-    }
-    if (!validateEmail(email)) {
-      setError('Please enter a valid email address');
       return;
     }
 
@@ -154,19 +121,18 @@ function FeedbackForm({ onBack }) {
       return;
     }
 
-    // Add current station feedback
-    setFeedbackEntries(prev => [
-      ...prev,
-      {
-        station: currentStation,
-        ratings: { ...currentRatings },
-        overallRating,
-        remarks
-      }
-    ]);
+    // Create new feedback entry first (to avoid race condition with state)
+    const newEntry = {
+      station: currentStation,
+      ratings: { ...currentRatings },
+      overallRating,
+      remarks
+    };
 
-    // Submit feedback
-    submitFeedback([...feedbackEntries, { station: currentStation, ratings: { ...currentRatings }, overallRating, remarks }]);
+    // Add current station feedback and submit with the new entry
+    const updatedEntries = [...feedbackEntries, newEntry];
+    setFeedbackEntries(updatedEntries);
+    submitFeedback(updatedEntries);
   };
 
   // Submit feedback to backend
@@ -178,11 +144,8 @@ function FeedbackForm({ onBack }) {
       const payload = {
         passengerName,
         dateOfJourney,
-        fromStation,
-        toStation,
         ticketNumber,
         mobile,
-        email,
         feedbackEntries: entries
       };
 
@@ -214,11 +177,8 @@ function FeedbackForm({ onBack }) {
   const handleReset = () => {
     setPassengerName('');
     setDateOfJourney('');
-    setFromStation('');
-    setToStation('');
     setTicketNumber('');
     setMobile('');
-    setEmail('');
     setStations(['RAICHUR']);
     setFeedbackEntries([]);
     setCurrentStation('RAICHUR');
@@ -307,28 +267,6 @@ function FeedbackForm({ onBack }) {
             />
           </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label>From Station *</label>
-              <input 
-                type="text" 
-                value={fromStation}
-                onChange={(e) => setFromStation(e.target.value.toUpperCase())}
-                placeholder="Departure station"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>To Station *</label>
-              <input 
-                type="text" 
-                value={toStation}
-                onChange={(e) => setToStation(e.target.value.toUpperCase())}
-                placeholder="Arrival station"
-              />
-            </div>
-          </div>
-
           <div className="form-group">
             <label>PNR / UTS Ticket No *</label>
             <input 
@@ -339,26 +277,14 @@ function FeedbackForm({ onBack }) {
             />
           </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label>Mobile Number *</label>
-              <input 
-                type="tel" 
-                value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
-                placeholder="10-digit mobile number"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Email *</label>
-              <input 
-                type="email" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="yourname@gmail.com"
-              />
-            </div>
+          <div className="form-group">
+            <label>Mobile Number *</label>
+            <input 
+              type="tel" 
+              value={mobile}
+              onChange={(e) => setMobile(e.target.value)}
+              placeholder="10-digit mobile number"
+            />
           </div>
 
           <button 

@@ -1,15 +1,16 @@
-# TODO - Fix Login Issue
+# TODO - Remove email, from, to from passenger details
 
-## Task: User unable to login - Fix authentication
+## Task: Remove email, From Station, and To Station fields from passenger details
 
-### Problem Identified:
-- users.json has corrupted/invalid bcrypt password hashes
-- Need to add a working user with valid credentials
+- [x] Update src/FeedbackForm.js - Remove email, fromStation, toStation state, validation, form fields, and submit payload
+- [x] Update server/index.js - Remove email, fromStation, toStation from backend validation and stored data
 
-### Solution:
-- [x] Analyzed the codebase and identified the issue
-- [ ] Add working user credentials to users.json
+## Changes Summary:
+1. [x] Remove email field from passenger details form
+2. [x] Remove From Station field from passenger details form
+3. [x] Remove To Station field from passenger details form
+4. [x] Remove related validations
+5. [x] Update API payload to exclude these fields
+6. [x] Update backend to not require/store these fields
 
-### Working Credentials to use:
-- Username: testuser
-- Password: Test@1234
+## Completed!

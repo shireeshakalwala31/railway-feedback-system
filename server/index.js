@@ -213,16 +213,16 @@ app.post('/api/feedback', (req, res) => {
     const {
       passengerName,
       dateOfJourney,
-      fromStation,
-      toStation,
       ticketNumber,
       mobile,
-      email,
-      feedbackEntries
+      feedbackEntries,
+      fromStation,
+      toStation,
+      email
     } = req.body;
     
-    if (!passengerName || !dateOfJourney || !fromStation || !toStation || !ticketNumber || !mobile) {
-      return res.status(400).json({ error: 'All passenger details are required' });
+    if (!passengerName || !dateOfJourney || !ticketNumber || !mobile) {
+      return res.status(400).json({ error: 'Passenger Name, Date of Journey, Ticket Number, and Mobile are required' });
     }
     
     const data = readData();
@@ -234,11 +234,11 @@ app.post('/api/feedback', (req, res) => {
           id: `FB-${String(data.length + savedFeedbacks.length + 1).padStart(4, '0')}`,
           location: entry.station.toUpperCase(),
           date: dateOfJourney,
-          fromDate: fromStation,
-          toDate: toStation,
           passengerName,
           pnrOrUts: ticketNumber,
           mobile,
+          fromStation: fromStation || '',
+          toStation: toStation || '',
           email: email || '',
           areas: {
             appearancePlatform: entry.ratings.platformCleanliness,
@@ -260,13 +260,13 @@ app.post('/api/feedback', (req, res) => {
     } else {
       const newFeedback = {
         id: `FB-${String(data.length + 1).padStart(4, '0')}`,
-        location: fromStation.toUpperCase(),
+        location: 'RAICHUR',
         date: dateOfJourney,
-        fromDate: fromStation,
-        toDate: toStation,
         passengerName,
         pnrOrUts: ticketNumber,
         mobile,
+        fromStation: fromStation || '',
+        toStation: toStation || '',
         email: email || '',
         areas: {
           appearancePlatform: 0,
