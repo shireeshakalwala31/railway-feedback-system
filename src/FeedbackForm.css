@@ -48,7 +48,7 @@ body {
   width: 100%;
   height: auto;
   display: block;
-  max-height: 200px;
+  max-height: 400px;
   object-fit: cover;
   border-radius: 12px 12px 0 0;
 }
