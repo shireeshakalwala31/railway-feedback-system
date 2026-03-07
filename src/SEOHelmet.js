@@ -3,26 +3,27 @@ import { Helmet } from 'react-helmet-async';
 import { useLocation } from 'react-router-dom';
 
 // Station-specific metadata configuration
+// Using relative paths for images - they will be served from the public folder on deployment
 const stationMetaData = {
   raichur: {
     title: 'Passengers Feedback Form - Raichur Station',
     description: 'Railway Station Housekeeping Feedback System - Raichur Station',
-    image: 'https://railway-feedback-system.vercel.app/Raichurimage.jpg',
-    url: 'https://railway-feedback-system.vercel.app/raichur',
+    image: '/Raichurimage.jpg',
+    url: '/raichur',
     stationName: 'Raichur Railway Station'
   },
   yadgir: {
     title: 'Passengers Feedback Form - Yadgir Station',
     description: 'Railway Station Housekeeping Feedback System - Yadgir Station',
-    image: 'https://railway-feedback-system.vercel.app/Yadgirimage.jpg',
-    url: 'https://railway-feedback-system.vercel.app/yadgir',
+    image: '/Yadgirimage.jpg',
+    url: '/yadgir',
     stationName: 'Yadgir Railway Station'
   },
   default: {
     title: 'Passengers Feedback Form - Railway Station',
     description: 'Railway Station Housekeeping Feedback System',
-    image: 'https://railway-feedback-system.vercel.app/railwaylogo.png',
-    url: 'https://railway-feedback-system.vercel.app',
+    image: '/rrb-logo.png',
+    url: '/',
     stationName: 'Railway Station'
   }
 };
