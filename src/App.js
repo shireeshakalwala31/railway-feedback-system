@@ -44,6 +44,17 @@ function ProtectedRoute({ children }) {
   return children;
 }
 
+// StationSaver component - saves station from URL to localStorage for login redirect
+function StationSaver({ station }) {
+  React.useEffect(() => {
+    if (station) {
+      localStorage.setItem('selectedStation', station.toUpperCase());
+    }
+  }, [station]);
+  
+  return null;
+}
+
 // Login handler component
 function LoginHandler({ station: stationProp }) {
   const navigate = useNavigate();
@@ -109,8 +120,12 @@ function App() {
         <Route path="/raichur" element={<LoginHandler station="RAICHUR" />} />
         <Route path="/yadgir" element={<LoginHandler station="YADGIR" />} />
         
-        {/* Public route for passengers to submit feedback - supports multiple stations via URL parameter */}
-        <Route path="/feedback/:station" element={<FeedbackForm />} />
+        {/* Protected route for passengers to submit feedback - requires authentication */}
+        <Route path="/feedback/:station" element={
+          <ProtectedRoute>
+            <FeedbackForm />
+          </ProtectedRoute>
+        } />
         
         {/* Public route for login */}
         <Route path="/login" element={<LoginHandler />} />
