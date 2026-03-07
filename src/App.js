@@ -159,7 +159,7 @@ function App() {
         
         {/* Protected route for passengers to submit feedback - requires authentication */}
         <Route path="/feedback/:station" element={
-          <ProtectedRoute>
+          <ProtectedRoute requiredStation=":station">
             <FeedbackForm />
           </ProtectedRoute>
         } />
