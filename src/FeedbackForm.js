@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import './FeedbackForm.css';
 
-const API_BASE = "https://railway-feedback-system-production.up.railway.app/api";
+const API_BASE = process.env.REACT_APP_API_BASE || 'https://railway-feedback-system-production.up.railway.app/api';
 
 // Rating questions matching the original form
 const questions = [
