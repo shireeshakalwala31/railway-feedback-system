@@ -1,0 +1,18 @@
+[
+  {
+    "id": "USR-0001",
+    "username": "admin",
+    "password": "$2a$10$rKZ8W5QGLLQxJJJqKxVJ0eHJnViEaFJnK5hVqXQz5dN0VvE9XqHq", 
+    "role": "admin",
+    "name": "Railway Administrator",
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "USR-0002",
+    "username": "officer",
+    "password": "$2a$10$8K1p/a0dL2.0MJH7MJH7MHE5V7GZ5JH7MJH7MH7MJH7MJH7MJH7MJHe",
+    "role": "officer",
+    "name": "Station Officer",
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  }
+]
