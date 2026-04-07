@@ -18,7 +18,19 @@ const ADMIN_CREDENTIALS = {
   station: 'RAICHUR'
 };
 
-app.use(cors());
+const corsOptions = {
+  origin: [
+    'https://railway-feedback-system.vercel.app',
+    'http://localhost:3000',
+    /\.vercel\.app$/
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+};
+
+app.use(cors(corsOptions));
+
 app.use(express.json());
 
 // Ensure data directory and file exist
