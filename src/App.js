@@ -6,8 +6,35 @@ import { AuthProvider, useAuth } from './AuthContext';
 
 const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5001/api';
 
+const normalizeRating = (value) => {
+  if (typeof value === 'string') {
+    const cleaned = value.trim();
+    if (!cleaned) return null;
+    const lowered = cleaned.toLowerCase();
+    if (lowered === 'excellent') return 5;
+    if (lowered === 'very good') return 5;
+    if (lowered === 'good') return 4;
+    if (lowered === 'satisfactory') return 3;
+    if (lowered === 'fair') return 3;
+    if (lowered === 'needs improvement') return 2;
+    if (lowered === 'poor') return 2;
+    if (lowered === 'very poor') return 1;
+    if (lowered === 'not applicable') return 0;
+    if (lowered === 'not attended') return 0;
+    const asNumber = Number(cleaned);
+    return Number.isNaN(asNumber) ? null : asNumber;
+  }
+
+  if (typeof value === 'number') {
+    return value;
+  }
+
+  return null;
+};
+
 // Rating label function
-const ratingLabel = (n) => {
+const ratingLabel = (value) => {
+  const n = normalizeRating(value);
   switch (n) {
     case 5: return 'Very Good';
     case 4: return 'Good';
@@ -418,8 +445,33 @@ function App() {
   );
 }
 
-const getRatingColor = (r) => { switch(r) { case 5: return '#16a34a'; case 4: return '#22c55e'; case 3: return '#eab308'; case 2: return '#f97316'; case 1: return '#dc2626'; default: return '#6b7280'; } };
-const getRatingBg = (r) => { switch(r) { case 5: case 4: return '#dcfce7'; case 3: return '#fef9c3'; case 2: return '#ffedd5'; case 1: return '#fee2e2'; default: return '#f3f4f6'; } };
+const getRatingColor = (value) => {
+  const r = normalizeRating(value);
+  switch(r) {
+    case 5: return '#16a34a';
+    case 4: return '#22c55e';
+    case 3: return '#eab308';
+    case 2: return '#f97316';
+    case 1: return '#dc2626';
+    default: return '#6b7280';
+  }
+};
+const getRatingBg = (value) => {
+  const r = normalizeRating(value);
+  switch(r) {
+    case 5:
+    case 4:
+      return '#dcfce7';
+    case 3:
+      return '#fef9c3';
+    case 2:
+      return '#ffedd5';
+    case 1:
+      return '#fee2e2';
+    default:
+      return '#f3f4f6';
+  }
+};
 
 const th = { textAlign: 'left', padding: '12px', borderBottom: '1px solid #eee', fontSize: 12, fontWeight: 600 };
 const td = { padding: '10px', borderBottom: '1px solid #f3f4f6', fontSize: 12 };
