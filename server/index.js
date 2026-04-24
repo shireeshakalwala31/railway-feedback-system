@@ -780,12 +780,20 @@ app.get('/api/feedback/locations', (req, res) => {
   }
 });
 
-// GET /api/feedback/public — Public endpoint
+// GET /api/feedback/public — Public endpoint (supports RCR/RAICHUR and YG/YADGIR aliases)
 app.get('/api/feedback/public', (req, res) => {
   try {
     const { location, date } = req.query;
     let data = readData();
-    if (location) data = data.filter(item => item.location === location.toUpperCase());
+    if (location) {
+      const loc = location.toUpperCase().trim();
+      const aliasMap = {
+        'RCR': ['RCR', 'RAICHUR'], 'YG': ['YG', 'YADGIR'],
+        'RAICHUR': ['RCR', 'RAICHUR'], 'YADGIR': ['YG', 'YADGIR'],
+      };
+      const valid = aliasMap[loc] || [loc];
+      data = data.filter(item => valid.includes((item.location || '').toUpperCase()));
+    }
     if (date) data = data.filter(item => item.date === date);
     data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     res.json(data);
