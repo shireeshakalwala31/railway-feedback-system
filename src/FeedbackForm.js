@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './FeedbackForm.css';
 
-const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5001/api';
+const API_BASE = process.env.REACT_APP_API_BASE || 'https://railway-feedback-backend.onrender.com/api';
 
 // Rating questions matching the original form
 const questions = [
@@ -22,12 +22,12 @@ const ratingOptions = [
   { value: 0, label: 'Not Attended' }
 ];
 
-function FeedbackForm({ onBack }) {
+function FeedbackForm({ onBack, predefinedStation }) {
   // Passenger details state
   const [passengerName, setPassengerName] = useState('');
   const [dateOfJourney, setDateOfJourney] = useState('');
-  const [fromStation, setFromStation] = useState('');
-  const [toStation, setToStation] = useState('');
+  const [fromStation, setFromStation] = useState(predefinedStation || '');
+  const [toStation, setToStation] = useState(predefinedStation || '');
   const [ticketNumber, setTicketNumber] = useState('');
   const [mobile, setMobile] = useState('');
   const [email, setEmail] = useState('');
@@ -64,25 +64,27 @@ function FeedbackForm({ onBack }) {
       setError('Please select Date of Journey');
       return;
     }
-    if (!fromStation) {
-      setError('From Station is required');
-      return;
-    }
-    if (!validateStation(fromStation)) {
-      setError('From Station should contain only alphabets');
-      return;
-    }
-    if (!toStation) {
-      setError('To Station is required');
-      return;
-    }
-    if (!validateStation(toStation)) {
-      setError('To Station should contain only alphabets');
-      return;
-    }
-    if (fromStation.toLowerCase() === toStation.toLowerCase()) {
-      setError('From and To stations cannot be same');
-      return;
+    if (!predefinedStation) {
+      if (!fromStation) {
+        setError('From Station is required');
+        return;
+      }
+      if (!validateStation(fromStation)) {
+        setError('From Station should contain only alphabets');
+        return;
+      }
+      if (!toStation) {
+        setError('To Station is required');
+        return;
+      }
+      if (!validateStation(toStation)) {
+        setError('To Station should contain only alphabets');
+        return;
+      }
+      if (fromStation.toLowerCase() === toStation.toLowerCase()) {
+        setError('From and To stations cannot be same');
+        return;
+      }
     }
     if (!ticketNumber) {
       setError('Ticket Number is required');
@@ -106,8 +108,9 @@ function FeedbackForm({ onBack }) {
     }
 
     // Set stations for feedback
-    setStations([fromStation, toStation]);
-    setCurrentStation(fromStation);
+    const targetStations = predefinedStation ? [predefinedStation] : [fromStation, toStation];
+    setStations(targetStations);
+    setCurrentStation(targetStations[0]);
     setCurrentStep(2);
   };
 
@@ -247,7 +250,7 @@ function FeedbackForm({ onBack }) {
         </p>
       </div>
 
-      <h1>FEEDBACK FORM FOR CMCC HOUSEKEEPING</h1>
+      <h1>FEEDBACK FORM FOR CMCC HOUSEKEEPING {predefinedStation ? `- ${predefinedStation}` : ''}</h1>
 
       {error && (
         <div className="error-message">
@@ -280,27 +283,29 @@ function FeedbackForm({ onBack }) {
             />
           </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label>From Station *</label>
-              <input 
-                type="text" 
-                value={fromStation}
-                onChange={(e) => setFromStation(e.target.value.toUpperCase())}
-                placeholder="Departure station"
-              />
-            </div>
+          {!predefinedStation && (
+            <div className="form-row">
+              <div className="form-group">
+                <label>From Station *</label>
+                <input 
+                  type="text" 
+                  value={fromStation}
+                  onChange={(e) => setFromStation(e.target.value.toUpperCase())}
+                  placeholder="Departure station"
+                />
+              </div>
 
-            <div className="form-group">
-              <label>To Station *</label>
-              <input 
-                type="text" 
-                value={toStation}
-                onChange={(e) => setToStation(e.target.value.toUpperCase())}
-                placeholder="Arrival station"
-              />
+              <div className="form-group">
+                <label>To Station *</label>
+                <input 
+                  type="text" 
+                  value={toStation}
+                  onChange={(e) => setToStation(e.target.value.toUpperCase())}
+                  placeholder="Arrival station"
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="form-group">
             <label>PNR / UTS Ticket No *</label>

@@ -1,7 +1,9 @@
 import React, { useMemo, useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import FeedbackForm from './FeedbackForm';
 import Login from './Login';
+import StationFeedback from './StationFeedback';
 import { AuthProvider, useAuth } from './AuthContext';
 
 const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5001/api';
@@ -440,7 +442,23 @@ function AppContent() {
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <BrowserRouter>
+        <Routes>
+          {/* Public Feedback Forms */}
+          <Route path="/yadgir" element={<FeedbackForm predefinedStation="YADGIR" />} />
+          <Route path="/raichur" element={<FeedbackForm predefinedStation="RAICHUR" />} />
+          <Route path="/feedback" element={<FeedbackForm />} />
+          
+          {/* Public Read-Only Records (if needed) */}
+          <Route path="/records/:station" element={<StationFeedback />} />
+
+          {/* Admin Routes */}
+          <Route path="/admin" element={<AppContent />} />
+          <Route path="/" element={<AppContent />} />
+          
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
     </AuthProvider>
   );
 }
