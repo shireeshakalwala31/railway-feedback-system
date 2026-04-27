@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 import './AdminDashboard.css';
 
-const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5000/api';
+const API_BASE = process.env.REACT_APP_API_BASE || 'https://railway-feedback-backend.onrender.com/api';
 
 const ratingLabel = (n) => {
   switch (n) {
