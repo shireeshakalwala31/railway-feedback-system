@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './FeedbackForm.css';
 
+// Always point to the live obhs Render backend directly
 const API_BASE = process.env.REACT_APP_API_BASE || 'https://railway-feedback-backend.onrender.com/api';
 
 // Rating questions matching the original form
@@ -122,38 +123,8 @@ function FeedbackForm({ onBack, predefinedStation }) {
     }));
   };
 
-  // Add station feedback
-  const handleAddStationFeedback = () => {
-    // Check all ratings are filled
-    const unfilledQuestions = questions.filter(q => !currentRatings[q.key]);
-    if (unfilledQuestions.length > 0) {
-      setError('Please rate all categories');
-      return;
-    }
-
-    setFeedbackEntries(prev => [
-      ...prev,
-      {
-        station: currentStation,
-        ratings: { ...currentRatings }
-      }
-    ]);
-
-    // Reset ratings and move to next station
-    setCurrentRatings({});
-    
-    // Find next station
-    const currentIndex = stations.indexOf(currentStation);
-    if (currentIndex < stations.length - 1) {
-      setCurrentStation(stations[currentIndex + 1]);
-    } else {
-      // All stations done, submit
-      handleSubmitFeedback();
-    }
-  };
-
-  // Submit feedback
-  const handleSubmitFeedback = async () => {
+  // Submit feedback — receives the final complete entries list directly to avoid stale-state race condition
+  const handleSubmitFeedback = async (allEntries) => {
     setIsSubmitting(true);
     setError('');
 
@@ -171,7 +142,7 @@ function FeedbackForm({ onBack, predefinedStation }) {
           ticketNumber,
           mobile,
           email,
-          feedbackEntries
+          feedbackEntries: allEntries
         })
       });
 
@@ -188,6 +159,38 @@ function FeedbackForm({ onBack, predefinedStation }) {
       setError(err.message || 'Failed to submit feedback. Please try again.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Add station feedback — builds the complete entries list synchronously to avoid React stale-state bug
+  const handleAddStationFeedback = () => {
+    // Check all ratings are filled
+    const unfilledQuestions = questions.filter(q => currentRatings[q.key] === undefined || currentRatings[q.key] === null);
+    if (unfilledQuestions.length > 0) {
+      setError('Please rate all categories');
+      return;
+    }
+    setError('');
+
+    // Build the new entry for the current station
+    const newEntry = {
+      station: currentStation,
+      ratings: { ...currentRatings }
+    };
+
+    // Build complete entries list synchronously — do NOT rely on state that hasn't updated yet
+    const allEntries = [...feedbackEntries, newEntry];
+
+    // Find next station
+    const currentIndex = stations.indexOf(currentStation);
+    if (currentIndex < stations.length - 1) {
+      // More stations to rate — update state and move to next station
+      setFeedbackEntries(allEntries);
+      setCurrentRatings({});
+      setCurrentStation(stations[currentIndex + 1]);
+    } else {
+      // Last (or only) station done — submit immediately with the complete synchronized list
+      handleSubmitFeedback(allEntries);
     }
   };
 
