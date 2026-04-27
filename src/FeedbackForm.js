@@ -91,6 +91,10 @@ function FeedbackForm({ onBack, predefinedStation }) {
       setError('Ticket Number is required');
       return;
     }
+    if (ticketNumber.length !== 10) {
+      setError('PNR / Ticket Number must be exactly 10 characters');
+      return;
+    }
     if (!mobile) {
       setError('Mobile Number is required');
       return;
