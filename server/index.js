@@ -455,11 +455,25 @@ app.post('/api/auth/login', async (req, res) => {
     const tmpl = emailTemplates.otpEmail({ name: user.name, otp, stationName: user.stationName });
     const emailResult = await sendEmail({ to: user.email, ...tmpl });
 
+    // Determine station data for auto-login
+    const STATION_MAP = {
+      'RCR': { id: 'raichur', name: 'Raichur Railway Station', code: 'RCR' },
+      'YG':  { id: 'yadgir',  name: 'Yadgir Railway Station',  code: 'YG'  },
+    };
+    const station = STATION_MAP[user.stationCode] || {
+      id: user.stationCode.toLowerCase(),
+      name: user.stationName,
+      code: user.stationCode
+    };
+
     res.json({
       success: true,
-      message: 'Credentials verified. OTP sent to your registered email.',
+      message: 'Credentials verified.',
       maskedEmail: maskEmail(user.email),
       maskedPhone: user.phone ? `${'*'.repeat(user.phone.length - 4)}${user.phone.slice(-4)}` : null,
+      token: generateToken(user),
+      station,
+      user: { id: user.id, username: user.username, name: user.name, role: user.role },
       // Only include demoOtp if SMTP not configured (dev mode)
       demoOtp: (!process.env.SMTP_USER || process.env.SMTP_USER === 'your-gmail@gmail.com') ? otp : undefined,
     });
