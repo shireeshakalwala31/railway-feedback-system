@@ -822,11 +822,21 @@ app.get('/api/feedback', authenticateToken, (req, res) => {
     const { location, date, fromDate, toDate } = req.query;
     let data = readData();
 
-    // ⭐ Only serve Raichur (RCR) and Yadgir (YG) data
-    data = data.filter(item => item.location === 'RCR' || item.location === 'RAICHUR' ||
-                                item.location === 'YG' || item.location === 'YADGIR');
+    // ⭐ Only serve Raichur (RCR) and Yadgir (YG) data — case-insensitive
+    data = data.filter(item => {
+      const loc = (item.location || '').toUpperCase().trim();
+      return loc === 'RCR' || loc === 'RAICHUR' || loc === 'YG' || loc === 'YADGIR';
+    });
 
-    if (location) data = data.filter(item => item.location === location.toUpperCase());
+    if (location) {
+      const locUpper = location.toUpperCase().trim();
+      const aliasMap = {
+        'RCR': ['RCR', 'RAICHUR'], 'YG': ['YG', 'YADGIR'],
+        'RAICHUR': ['RCR', 'RAICHUR'], 'YADGIR': ['YG', 'YADGIR'],
+      };
+      const validLocs = aliasMap[locUpper] || [locUpper];
+      data = data.filter(item => validLocs.includes((item.location || '').toUpperCase().trim()));
+    }
     if (date) data = data.filter(item => item.date === date);
     if (fromDate && toDate) data = data.filter(item => item.date >= fromDate && item.date <= toDate);
     else if (fromDate) data = data.filter(item => item.date >= fromDate);
@@ -861,9 +871,11 @@ app.delete('/api/feedback/:id', authenticateToken, (req, res) => {
 app.get('/api/stats', authenticateToken, (req, res) => {
   try {
     let data = readData();
-    // Filter to Raichur and Yadgir only
-    data = data.filter(item => item.location === 'RCR' || item.location === 'RAICHUR' ||
-                                item.location === 'YG'  || item.location === 'YADGIR');
+    // Filter to Raichur and Yadgir only — case-insensitive
+    data = data.filter(item => {
+      const loc = (item.location || '').toUpperCase().trim();
+      return loc === 'RCR' || loc === 'RAICHUR' || loc === 'YG' || loc === 'YADGIR';
+    });
 
     const totalFeedback = data.length;
     const locations = [...new Set(data.map(item => item.location))];
