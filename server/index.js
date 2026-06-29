@@ -806,7 +806,7 @@ app.get('/api/feedback/public', (req, res) => {
         'RAICHUR': ['RCR', 'RAICHUR'], 'YADGIR': ['YG', 'YADGIR'],
       };
       const valid = aliasMap[loc] || [loc];
-      data = data.filter(item => valid.includes((item.location || '').toUpperCase()));
+      data = data.filter(item => valid.includes((item.location || '').toUpperCase().trim()));
     }
     if (date) data = data.filter(item => item.date === date);
     data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
