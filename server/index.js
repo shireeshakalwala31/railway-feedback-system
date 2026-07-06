@@ -6,6 +6,7 @@ const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
+const mongoose = require('mongoose');
 const { 
   JWT_SECRET, 
   authenticateToken, 
@@ -72,7 +73,27 @@ app.use(cors());
 app.use(express.json());
 
 // ============================================================
-// DATA HELPERS
+// MONGODB — FEEDBACK MODEL
+// ============================================================
+const feedbackSchema = new mongoose.Schema({
+  id:            { type: String, unique: true, index: true },
+  location:      { type: String, uppercase: true, trim: true, index: true },
+  date:          String,
+  fromDate:      { type: String, default: '' },
+  toDate:        { type: String, default: '' },
+  passengerName: String,
+  pnrOrUts:      String,
+  mobile:        String,
+  email:         { type: String, default: '' },
+  areas:         { type: mongoose.Schema.Types.Mixed, default: {} },
+  remarks:       { type: String, default: '' },
+  createdAt:     { type: String, default: () => new Date().toISOString() },
+}, { collection: 'feedbacks', timestamps: false, versionKey: false });
+
+const Feedback = mongoose.model('Feedback', feedbackSchema);
+
+// ============================================================
+// DATA HELPERS (MongoDB primary, file fallback)
 // ============================================================
 const ensureDataFile = () => {
   const dataDir = path.join(__dirname, 'data');
@@ -80,13 +101,47 @@ const ensureDataFile = () => {
   if (!fs.existsSync(DATA_FILE)) fs.writeFileSync(DATA_FILE, JSON.stringify([], null, 2));
 };
 
-const readData = () => {
+const isMongoReady = () => mongoose.connection.readyState === 1;
+
+// Read all feedback records
+const readData = async () => {
+  try {
+    if (isMongoReady()) return await Feedback.find({}).lean();
+  } catch (e) { console.error('[DB] readData error:', e.message); }
   ensureDataFile();
   return JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
 };
 
-const writeData = (data) => {
+// Insert a single new feedback record
+const insertFeedback = async (item) => {
+  try {
+    if (isMongoReady()) { await Feedback.create(item); return; }
+  } catch (e) { console.error('[DB] insertFeedback error:', e.message); }
+  ensureDataFile();
+  const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+  data.push(item);
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+};
+
+// Delete a feedback by custom id field
+const deleteFeedbackById = async (id) => {
+  if (isMongoReady()) return await Feedback.deleteOne({ id });
+  ensureDataFile();
+  const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+  const newData = data.filter(item => item.id !== id);
+  fs.writeFileSync(DATA_FILE, JSON.stringify(newData, null, 2));
+  return { deletedCount: data.length - newData.length };
+};
+
+// Bulk insert (for seeding / import)
+const bulkInsertFeedback = async (items) => {
+  if (isMongoReady()) {
+    await Feedback.insertMany(items, { ordered: false }).catch(() => {});
+    return;
+  }
+  ensureDataFile();
+  const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+  fs.writeFileSync(DATA_FILE, JSON.stringify([...data, ...items], null, 2));
 };
 
 // Generate 6-digit numeric OTP
@@ -718,7 +773,7 @@ app.get('/api/auth/verify', authenticateToken, (req, res) => {
 const AREA_KEYS_SET = new Set(AREA_KEYS);
 
 // POST /api/feedback — Submit new feedback (Public)
-app.post('/api/feedback', (req, res) => {
+app.post('/api/feedback', async (req, res) => {
   try {
     const { passengerName, dateOfJourney, fromStation, toStation, ticketNumber, mobile, email, feedbackEntries } = req.body;
 
@@ -726,13 +781,18 @@ app.post('/api/feedback', (req, res) => {
       return res.status(400).json({ error: 'All passenger details are required.' });
     }
 
-    const data = readData();
+    // Get current count for ID generation (from MongoDB or file)
+    const count = isMongoReady()
+      ? await Feedback.countDocuments()
+      : JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8')).length;
+
     const savedFeedbacks = [];
 
     if (feedbackEntries && feedbackEntries.length > 0) {
-      for (const entry of feedbackEntries) {
+      for (let i = 0; i < feedbackEntries.length; i++) {
+        const entry = feedbackEntries[i];
         const newFeedback = {
-          id: `FB-${String(data.length + savedFeedbacks.length + 1).padStart(4, '0')}`,
+          id: `FB-${String(count + savedFeedbacks.length + 1).padStart(4, '0')}-${Date.now()}`,
           location: entry.station.toUpperCase(),
           date: dateOfJourney,
           fromDate: fromStation,
@@ -753,12 +813,12 @@ app.post('/api/feedback', (req, res) => {
           remarks: entry.remarks || '',
           createdAt: new Date().toISOString()
         };
-        data.push(newFeedback);
+        await insertFeedback(newFeedback);
         savedFeedbacks.push(newFeedback);
       }
     } else {
       const newFeedback = {
-        id: `FB-${String(data.length + 1).padStart(4, '0')}`,
+        id: `FB-${String(count + 1).padStart(4, '0')}-${Date.now()}`,
         location: fromStation.toUpperCase(),
         date: dateOfJourney,
         fromDate: fromStation,
@@ -771,11 +831,10 @@ app.post('/api/feedback', (req, res) => {
         remarks: '',
         createdAt: new Date().toISOString()
       };
-      data.push(newFeedback);
+      await insertFeedback(newFeedback);
       savedFeedbacks.push(newFeedback);
     }
 
-    writeData(data);
     res.status(201).json({ success: true, message: 'Feedback submitted successfully.', feedbacks: savedFeedbacks });
   } catch (error) {
     console.error('Error saving data:', error);
@@ -784,10 +843,11 @@ app.post('/api/feedback', (req, res) => {
 });
 
 // GET /api/feedback/locations
-app.get('/api/feedback/locations', (req, res) => {
+app.get('/api/feedback/locations', async (req, res) => {
   try {
-    const data = readData();
-    const locations = [...new Set(data.map(item => item.location))];
+    const locations = isMongoReady()
+      ? await Feedback.distinct('location')
+      : [...new Set((await readData()).map(item => item.location))];
     res.json(locations);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch locations.' });
@@ -795,21 +855,29 @@ app.get('/api/feedback/locations', (req, res) => {
 });
 
 // GET /api/feedback/public — Public endpoint (supports RCR/RAICHUR and YG/YADGIR aliases)
-app.get('/api/feedback/public', (req, res) => {
+app.get('/api/feedback/public', async (req, res) => {
   try {
     const { location, date } = req.query;
-    let data = readData();
+    const aliasMap = {
+      'RCR': ['RCR', 'RAICHUR'], 'YG': ['YG', 'YADGIR'],
+      'RAICHUR': ['RCR', 'RAICHUR'], 'YADGIR': ['YG', 'YADGIR'],
+    };
+    let query = {};
     if (location) {
       const loc = location.toUpperCase().trim();
-      const aliasMap = {
-        'RCR': ['RCR', 'RAICHUR'], 'YG': ['YG', 'YADGIR'],
-        'RAICHUR': ['RCR', 'RAICHUR'], 'YADGIR': ['YG', 'YADGIR'],
-      };
       const valid = aliasMap[loc] || [loc];
-      data = data.filter(item => valid.includes((item.location || '').toUpperCase().trim()));
+      query.location = { $in: valid };
     }
-    if (date) data = data.filter(item => item.date === date);
-    data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    if (date) query.date = date;
+    let data;
+    if (isMongoReady()) {
+      data = await Feedback.find(query).sort({ createdAt: -1 }).lean();
+    } else {
+      data = await readData();
+      if (location) { const valid = aliasMap[location.toUpperCase().trim()] || [location.toUpperCase().trim()]; data = data.filter(i => valid.includes((i.location||'').toUpperCase().trim())); }
+      if (date) data = data.filter(i => i.date === date);
+      data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }
     res.json(data);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch feedback data.' });
@@ -817,31 +885,36 @@ app.get('/api/feedback/public', (req, res) => {
 });
 
 // GET /api/feedback — Protected, only Raichur + Yadgir
-app.get('/api/feedback', authenticateToken, (req, res) => {
+app.get('/api/feedback', authenticateToken, async (req, res) => {
   try {
     const { location, date, fromDate, toDate } = req.query;
-    let data = readData();
+    const aliasMap = {
+      'RCR': ['RCR', 'RAICHUR'], 'YG': ['YG', 'YADGIR'],
+      'RAICHUR': ['RCR', 'RAICHUR'], 'YADGIR': ['YG', 'YADGIR'],
+    };
 
-    // ⭐ Only serve Raichur (RCR) and Yadgir (YG) data — case-insensitive
-    data = data.filter(item => {
-      const loc = (item.location || '').toUpperCase().trim();
-      return loc === 'RCR' || loc === 'RAICHUR' || loc === 'YG' || loc === 'YADGIR';
-    });
-
-    if (location) {
-      const locUpper = location.toUpperCase().trim();
-      const aliasMap = {
-        'RCR': ['RCR', 'RAICHUR'], 'YG': ['YG', 'YADGIR'],
-        'RAICHUR': ['RCR', 'RAICHUR'], 'YADGIR': ['YG', 'YADGIR'],
-      };
-      const validLocs = aliasMap[locUpper] || [locUpper];
-      data = data.filter(item => validLocs.includes((item.location || '').toUpperCase().trim()));
+    let data;
+    if (isMongoReady()) {
+      // ⭐ Only serve Raichur + Yadgir
+      let query = { location: { $in: ['RCR', 'RAICHUR', 'YG', 'YADGIR'] } };
+      if (location) {
+        const validLocs = aliasMap[location.toUpperCase().trim()] || [location.toUpperCase().trim()];
+        query.location = { $in: validLocs };
+      }
+      if (date) query.date = date;
+      if (fromDate && toDate) query.date = { $gte: fromDate, $lte: toDate };
+      else if (fromDate) query.date = { $gte: fromDate };
+      else if (toDate) query.date = { $lte: toDate };
+      data = await Feedback.find(query).sort({ createdAt: -1 }).lean();
+    } else {
+      data = await readData();
+      data = data.filter(item => { const loc = (item.location||'').toUpperCase().trim(); return ['RCR','RAICHUR','YG','YADGIR'].includes(loc); });
+      if (location) { const validLocs = aliasMap[location.toUpperCase().trim()] || [location.toUpperCase().trim()]; data = data.filter(i => validLocs.includes((i.location||'').toUpperCase().trim())); }
+      if (date) data = data.filter(i => i.date === date);
+      if (fromDate && toDate) data = data.filter(i => i.date >= fromDate && i.date <= toDate);
+      else if (fromDate) data = data.filter(i => i.date >= fromDate);
+      else if (toDate) data = data.filter(i => i.date <= toDate);
     }
-    if (date) data = data.filter(item => item.date === date);
-    if (fromDate && toDate) data = data.filter(item => item.date >= fromDate && item.date <= toDate);
-    else if (fromDate) data = data.filter(item => item.date >= fromDate);
-    else if (toDate) data = data.filter(item => item.date <= toDate);
-
     res.json(data);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch feedback data.' });
@@ -849,18 +922,16 @@ app.get('/api/feedback', authenticateToken, (req, res) => {
 });
 
 // DELETE /api/feedback/:id — Protected, admin only
-app.delete('/api/feedback/:id', authenticateToken, (req, res) => {
+app.delete('/api/feedback/:id', authenticateToken, async (req, res) => {
   try {
     if (req.user.role !== 'admin' && req.user.role !== 'station_admin') {
       return res.status(403).json({ error: 'Not authorized to delete feedback.' });
     }
     const { id } = req.params;
-    const data = readData();
-    const newData = data.filter(item => item.id !== id);
-    if (newData.length === data.length) {
+    const result = await deleteFeedbackById(id);
+    if (!result || result.deletedCount === 0) {
       return res.status(404).json({ error: 'Feedback not found.' });
     }
-    writeData(newData);
     res.json({ success: true, message: 'Feedback deleted.' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete feedback.' });
@@ -868,14 +939,15 @@ app.delete('/api/feedback/:id', authenticateToken, (req, res) => {
 });
 
 // GET /api/stats — Protected
-app.get('/api/stats', authenticateToken, (req, res) => {
+app.get('/api/stats', authenticateToken, async (req, res) => {
   try {
-    let data = readData();
-    // Filter to Raichur and Yadgir only — case-insensitive
-    data = data.filter(item => {
-      const loc = (item.location || '').toUpperCase().trim();
-      return loc === 'RCR' || loc === 'RAICHUR' || loc === 'YG' || loc === 'YADGIR';
-    });
+    let data;
+    if (isMongoReady()) {
+      data = await Feedback.find({ location: { $in: ['RCR', 'RAICHUR', 'YG', 'YADGIR'] } }).lean();
+    } else {
+      data = await readData();
+      data = data.filter(item => { const loc = (item.location||'').toUpperCase().trim(); return ['RCR','RAICHUR','YG','YADGIR'].includes(loc); });
+    }
 
     const totalFeedback = data.length;
     const locations = [...new Set(data.map(item => item.location))];
@@ -958,22 +1030,22 @@ const importFeedbackFromRemote = async (sourceUrl) => {
   if (typeof fetch !== 'function') throw new Error('fetch API not available');
   const remotePayload = await fetchRemoteFeedbackData(sourceUrl);
   const remoteItems = Array.isArray(remotePayload) ? remotePayload : (Array.isArray(remotePayload?.feedbacks) ? remotePayload.feedbacks : []);
-  const existingData = readData();
+  const existingData = await readData();
   const existingSignatures = new Set(existingData.map(createFeedbackSignature));
   const existingIds = new Set(existingData.map(item => item.id));
-  const imported = [], skipped = [];
+  const imported = [], skipped = [], toInsert = [];
   for (const item of remoteItems) {
     const normalized = normalizeRemoteFeedback(item, `FB-REMOTE-${uuidv4().slice(0, 8)}`);
     const sig = createFeedbackSignature(normalized);
     if (!normalized.location || !normalized.date || !normalized.passengerName) { skipped.push({ id: normalized.id, reason: 'missing_fields' }); continue; }
     if (existingSignatures.has(sig)) { skipped.push({ id: normalized.id, reason: 'duplicate' }); continue; }
     if (existingIds.has(normalized.id)) normalized.id = `FB-REMOTE-${uuidv4().slice(0, 8)}`;
-    existingData.push(normalized);
     existingSignatures.add(sig);
     existingIds.add(normalized.id);
+    toInsert.push(normalized);
     imported.push(normalized.id);
   }
-  writeData(existingData);
+  if (toInsert.length > 0) await bulkInsertFeedback(toInsert);
   return { success: true, totalRemoteRecords: remoteItems.length, importedCount: imported.length, skippedCount: skipped.length, importedIds: imported };
 };
 
@@ -989,25 +1061,57 @@ app.post('/api/feedback/import-remote', authenticateToken, async (req, res) => {
 });
 
 // ============================================================
-// START SERVER
+// START SERVER — Connect MongoDB first, then listen
 // ============================================================
-app.listen(PORT, () => {
-  console.log(`\n🚉 Aisrailindia Backend running on http://localhost:${PORT}`);
-  console.log(`📧 Admin email: ${ADMIN_EMAIL}`);
-  console.log(`📬 SMTP configured: ${!!(process.env.SMTP_USER && process.env.SMTP_USER !== 'your-gmail@gmail.com')}`);
+const startServer = async () => {
   ensureDataFile();
 
-  const autoSyncUrl = process.env.REMOTE_FEEDBACK_URL || 'https://railway-feedback-backend.onrender.com/api/feedback';
-  const intervalMinutes = Number(process.env.REMOTE_SYNC_MINUTES || '1');
-  if (intervalMinutes > 0) {
-    console.log(`🔄 Auto-sync enabled every ${intervalMinutes} min from: ${autoSyncUrl}`);
-    const runSync = async () => {
-      try {
-        const result = await importFeedbackFromRemote(autoSyncUrl);
-        console.log(`[SYNC] Imported=${result.importedCount} Skipped=${result.skippedCount}`);
-      } catch (err) { console.error('[SYNC] Failed:', err.message); }
-    };
-    runSync();
-    setInterval(runSync, intervalMinutes * 60 * 1000);
+  // Connect to MongoDB Atlas
+  const mongoUri = process.env.MONGO_URI;
+  if (mongoUri) {
+    try {
+      await mongoose.connect(mongoUri, { serverSelectionTimeoutMS: 10000 });
+      console.log('🍃 MongoDB Atlas connected — feedback data is now persistent!');
+
+      // ── SEED: if MongoDB has no records, import from feedback.json ──
+      const existingCount = await Feedback.countDocuments();
+      if (existingCount === 0) {
+        console.log('[SEED] MongoDB empty — seeding from feedback.json...');
+        const fileData = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+        if (fileData.length > 0) {
+          await Feedback.insertMany(fileData, { ordered: false });
+          console.log(`[SEED] ✅ Seeded ${fileData.length} records into MongoDB`);
+        }
+      } else {
+        console.log(`[MongoDB] ✅ ${existingCount} feedback records already stored`);
+      }
+    } catch (err) {
+      console.error('❌ MongoDB connection failed:', err.message);
+      console.warn('⚠️  Falling back to feedback.json for data storage.');
+    }
+  } else {
+    console.warn('⚠️  MONGO_URI not set — using feedback.json (data lost on restart!)');
   }
-});
+
+  app.listen(PORT, () => {
+    console.log(`\n🚉 Aisrailindia Backend running on http://localhost:${PORT}`);
+    console.log(`📧 Admin email: ${ADMIN_EMAIL}`);
+    console.log(`📬 SMTP configured: ${!!(process.env.SMTP_USER && process.env.SMTP_USER !== 'your-gmail@gmail.com')}`);
+
+    // Auto-sync disabled (we now use MongoDB — no need to sync from remote file)
+    const autoSyncUrl = process.env.REMOTE_FEEDBACK_URL;
+    const intervalMinutes = Number(process.env.REMOTE_SYNC_MINUTES || '0');
+    if (intervalMinutes > 0 && autoSyncUrl) {
+      console.log(`🔄 Auto-sync enabled every ${intervalMinutes} min from: ${autoSyncUrl}`);
+      const runSync = async () => {
+        try {
+          const result = await importFeedbackFromRemote(autoSyncUrl);
+          if (result.importedCount > 0) console.log(`[SYNC] Imported=${result.importedCount} Skipped=${result.skippedCount}`);
+        } catch (err) { console.error('[SYNC] Failed:', err.message); }
+      };
+      setInterval(runSync, intervalMinutes * 60 * 1000);
+    }
+  });
+};
+
+startServer();
