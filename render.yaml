@@ -1,6 +1,6 @@
 services:
   - type: web
-      plan: free
+    plan: free
     name: railway-feedback-backend
     runtime: node
     rootDir: server
@@ -11,4 +11,20 @@ services:
         value: production
       - key: JWT_SECRET
         generateValue: true
+      - key: MONGO_URI
+        value: mongodb+srv://adminadmin:Dsl9ycGKGmrNWGRm@cluster0.rssmtkm.mongodb.net/obhsfeedback?retryWrites=true&w=majority&appName=Cluster0
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        value: shireesha.k@amazonitsolutions.in
+      - key: SMTP_PASS
+        value: pckb cnsq stht vrtw
+      - key: ADMIN_EMAIL
+        value: shireesha.k@amazonitsolutions.in
+      - key: FRONTEND_URL
+        value: https://aisrailindia.com
+      - key: REMOTE_SYNC_MINUTES
+        value: "0"
     healthCheckPath: /api/auth/verify
